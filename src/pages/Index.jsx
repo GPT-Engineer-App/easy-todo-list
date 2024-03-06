@@ -8,7 +8,10 @@ const Index = () => {
     return savedLists ? JSON.parse(savedLists) : [];
   });
   const [newListTitle, setNewListTitle] = useState("");
-  const [selectedListIndex, setSelectedListIndex] = useState(null);
+  const [selectedListIndex, setSelectedListIndex] = useState(() => {
+    const savedIndex = localStorage.getItem("selectedListIndex");
+    return savedIndex ? JSON.parse(savedIndex) : null;
+  });
   const toast = useToast();
 
   const handleListAdd = () => {
@@ -16,6 +19,8 @@ const Index = () => {
       const updatedLists = [...lists, { title: newListTitle, items: [] }];
       setLists(updatedLists);
       localStorage.setItem("lists", JSON.stringify(updatedLists));
+      localStorage.setItem("selectedListIndex", JSON.stringify(updatedLists.length - 1));
+      setSelectedListIndex(updatedLists.length - 1);
       setNewListTitle("");
     } else {
       toast({
@@ -49,7 +54,10 @@ const Index = () => {
     const newLists = lists.filter((_, i) => i !== index);
     setLists(newLists);
     localStorage.setItem("lists", JSON.stringify(newLists));
-    setSelectedListIndex(null);
+    if (index === selectedListIndex) {
+      localStorage.removeItem("selectedListIndex");
+      setSelectedListIndex(null);
+    }
   };
 
   return (
@@ -66,7 +74,14 @@ const Index = () => {
           <HStack spacing={4}>
             <VStack align="stretch">
               {lists.map((list, index) => (
-                <Button key={index} onClick={() => setSelectedListIndex(index)} variant={selectedListIndex === index ? "solid" : "outline"}>
+                <Button
+                  key={index}
+                  onClick={() => {
+                    setSelectedListIndex(index);
+                    localStorage.setItem("selectedListIndex", JSON.stringify(index));
+                  }}
+                  variant={selectedListIndex === index ? "solid" : "outline"}
+                >
                   {list.title}
                 </Button>
               ))}
