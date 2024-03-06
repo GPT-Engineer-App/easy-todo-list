@@ -3,14 +3,19 @@ import { ChakraProvider, Box, VStack, HStack, Input, Button, Text, IconButton, u
 import { FaPlus, FaTrash } from "react-icons/fa";
 
 const Index = () => {
-  const [lists, setLists] = useState([]);
+  const [lists, setLists] = useState(() => {
+    const savedLists = localStorage.getItem("lists");
+    return savedLists ? JSON.parse(savedLists) : [];
+  });
   const [newListTitle, setNewListTitle] = useState("");
   const [selectedListIndex, setSelectedListIndex] = useState(null);
   const toast = useToast();
 
   const handleListAdd = () => {
     if (newListTitle) {
-      setLists([...lists, { title: newListTitle, items: [] }]);
+      const updatedLists = [...lists, { title: newListTitle, items: [] }];
+      setLists(updatedLists);
+      localStorage.setItem("lists", JSON.stringify(updatedLists));
       setNewListTitle("");
     } else {
       toast({
@@ -29,6 +34,7 @@ const Index = () => {
       const newLists = [...lists];
       newLists[index].items.push({ name: itemName, isCompleted: false });
       setLists(newLists);
+      localStorage.setItem("lists", JSON.stringify(newLists));
     }
   };
 
@@ -36,11 +42,13 @@ const Index = () => {
     const newLists = [...lists];
     newLists[listIndex].items[itemIndex].isCompleted = !newLists[listIndex].items[itemIndex].isCompleted;
     setLists(newLists);
+    localStorage.setItem("lists", JSON.stringify(newLists));
   };
 
   const handleListDelete = (index) => {
     const newLists = lists.filter((_, i) => i !== index);
     setLists(newLists);
+    localStorage.setItem("lists", JSON.stringify(newLists));
     setSelectedListIndex(null);
   };
 
